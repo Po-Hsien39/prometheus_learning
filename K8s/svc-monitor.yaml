@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    monitoring: prometheus
+    team: techfresh
+  name: learning-prometheus-metrics
+  namespace: techfresh
+spec:
+  endpoints:
+  - interval: 15s
+    path: /metrics
+    targetPort: 8000
+  namespaceSelector:
+    matchNames:
+    - techfresh
+  selector:
+    matchLabels:
+      app: learning-prometheus

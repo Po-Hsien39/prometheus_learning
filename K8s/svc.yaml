@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: learning-prometheus-service
+  namespace: techfresh
+  labels:
+    app: learning-prometheus
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8000
+  selector:
+    app: learning-prometheus
+  type: ClusterIP

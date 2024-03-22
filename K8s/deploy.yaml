@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: learning-prometheus
-          image: tristan0725/prometheus_learning
+          image: tristan0725/prometheus_learning:v0.0.2
           ports:
             - containerPort: 3000
             - containerPort: 8000
