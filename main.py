@@ -29,21 +29,21 @@ def metrics():
     return Response(generate_latest())
 
 @app.route('/')
-@LATENCY.labels(route="/").time()
 def index():
-    time.sleep(random.random())
-    HTTP_REQUESTS_TOTAL.labels(route="/", status_code='200').inc()
-    return 'Hello, World!'
+    with LATENCY.labels(route="/").time():
+        time.sleep(random.random())
+        HTTP_REQUESTS_TOTAL.labels(route="/", status_code='200').inc()
+        return 'Hello, World!'
 
 @app.route('/hello')
-@LATENCY.labels(route="/hello").time()
 def hello():
-    status_code = random.choice([200, 404, 400, 500])
-    HTTP_REQUESTS_TOTAL.labels(route="/hello", status_code=str(status_code)).inc()
-    if status_code == 200:
-        return 'Hello, World!', status_code
-    else:
-        return f'Error with status code {status_code}', status_code
+    with LATENCY.labels(route="/hello").time():
+        status_code = random.choice([200, 404, 400, 500])
+        HTTP_REQUESTS_TOTAL.labels(route="/hello", status_code=str(status_code)).inc()
+        if status_code == 200:
+            return 'Hello, World!', status_code
+        else:
+            return f'Error with status code {status_code}', status_code
 
 if __name__ == '__main__':
     start_http_server(8000)

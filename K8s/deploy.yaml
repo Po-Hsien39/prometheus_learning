@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: learning-prometheus
+  labels:
+    app: learning-prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: learning-prometheus
+  template:
+    metadata:
+      labels:
+        app: learning-prometheus
+    spec:
+      containers:
+        - name: learning-prometheus
+          image: tristan0725/prometheus_learning
+          ports:
+            - containerPort: 3000
+            - containerPort: 8000
