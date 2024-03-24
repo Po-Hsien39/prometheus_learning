@@ -19,4 +19,6 @@ spec:
           image: tristan0725/prometheus_learning:v0.0.2
           ports:
             - containerPort: 3000
+              name: server 
             - containerPort: 8000
+              name: metrics
