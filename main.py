@@ -24,10 +24,6 @@ def after_request(response):
     RESPONSE_SIZE.labels(route=endpoint).observe(response_size)
     return response
 
-@app.route('/metrics')
-def metrics():
-    return Response(generate_latest())
-
 @app.route('/')
 def index():
     with LATENCY.labels(route="/").time():
