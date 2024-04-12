@@ -1,6 +1,8 @@
 from flask import Flask, Response, request
 from prometheus_client import start_http_server, Counter, Histogram, Gauge, generate_latest
 import time, random
+import logging
+from pythonjsonlogger import jsonlogger
 
 app = Flask(__name__)
 
@@ -9,6 +11,14 @@ HTTP_REQUESTS_TOTAL = Counter('requests_total', 'num of total requests', ['route
 HTTP_REQUESTS_IN_FLIGHT = Gauge('request_in_flight', 'num of in flight requests', ['route'])
 LATENCY = Histogram('request_duration_seconds', 'Request latency', ['route'])
 RESPONSE_SIZE = Histogram('response_size_bytes', 'Response size in bytes', ['route'])
+
+# 設定日誌記錄器以使用 JSON 格式
+logger = logging.getLogger("jsonLogger")
+logHandler = logging.StreamHandler()
+formatter = jsonlogger.JsonFormatter()
+logHandler.setFormatter(formatter)
+logger.addHandler(logHandler)
+logger.setLevel(logging.INFO)
 
 @app.before_request
 def before_request():
@@ -22,6 +32,7 @@ def after_request(response):
     # Monitor response size
     response_size = len(response.data)
     RESPONSE_SIZE.labels(route=endpoint).observe(response_size)
+    logger.info({'message': 'Request processed', 'route': endpoint, 'status_code': response.status_code, 'response_size': response_size})
     return response
 
 @app.route('/')
