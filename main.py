@@ -1,8 +1,11 @@
-from flask import Flask, Response, request
-from prometheus_client import start_http_server, Counter, Histogram, Gauge, generate_latest
+from flask import Flask, request
+from prometheus_client import start_http_server, Counter, Histogram, Gauge
 import time, random
 import logging
 from pythonjsonlogger import jsonlogger
+from opentelemetry import trace
+
+tracer = trace.get_tracer("hello.tracer")
 
 app = Flask(__name__)
 
@@ -44,7 +47,7 @@ def index():
 
 @app.route('/hello')
 def hello():
-    with LATENCY.labels(route="/hello").time():
+    with LATENCY.labels(route="/hello").time() and tracer.start_as_current_span("parent") as rollspan:
         status_code = random.choice([200, 404, 400, 500])
         HTTP_REQUESTS_TOTAL.labels(route="/hello", status_code=str(status_code)).inc()
         if status_code == 200:
@@ -54,4 +57,4 @@ def hello():
 
 if __name__ == '__main__':
     start_http_server(8000)
-    app.run(host='0.0.0.0', port=3000)
+    app.run(host='0.0.0.0', port=4000)
