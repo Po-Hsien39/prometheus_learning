@@ -1,22 +1,30 @@
 version: '3.8'
 
 services:
-  backend:
-    build: .
-    restart: always
+  mysql:
+    image: mysql:8.4
     ports:
-      - "8000:8000"
-      - "4000:4000"
+      - "3306:3306"
     environment:
-      OTEL_PYTHON_LOG_CORRELATION: "true"
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
-      OTEL_METRICS_EXPORTER: "none"
-      OTEL_SERVICE_NAME: "learning-tracing"
-    depends_on:
-      - prometheus
-      - tempo
-      - otel-collector
-    command: "opentelemetry-instrument python main.py"
+      MYSQL_ROOT_PASSWORD: 1234
+
+  # backend:
+  #   build: .
+  #   restart: always
+  #   ports:
+  #     - "8000:8000"
+  #     - "4000:4000"
+  #   environment:
+  #     OTEL_PYTHON_LOG_CORRELATION: "true"
+  #     OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
+  #     OTEL_METRICS_EXPORTER: "none"
+  #     OTEL_SERVICE_NAME: "learning-tracing"
+  #   depends_on:
+  #     - prometheus
+  #     - tempo
+  #     - otel-collector
+  #     - mysql
+  #   command: "opentelemetry-instrument python main.py"
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.86.0

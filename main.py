@@ -4,6 +4,7 @@ import time, random
 import logging
 from pythonjsonlogger import jsonlogger
 from opentelemetry import trace
+from db import initialize_database, query_db, commit_db
 
 tracer = trace.get_tracer("hello.tracer")
 
@@ -54,7 +55,32 @@ def hello():
             return 'Hello, World!', status_code
         else:
             return f'Error with status code {status_code}', status_code
+    
+@app.route('/todos', methods=['GET'])
+def getTodo():
+    with tracer.start_as_current_span("Get Todo list"):
+        result = query_db("SELECT * FROM todo")
+        return result
+
+@app.route('/todo', methods=['POST'])
+def createTodo():
+    content = request.json['content']
+    if not content:
+        return 'Not provide content', 400
+    with tracer.start_as_current_span("Create Todo"):
+        commit_db("INSERT INTO todo (task) VALUES (%s)", [content])
+        return "success"
+
+@app.route('/todo', methods=['DELETE'])
+def deleteTodo():
+    content = request.json['content']
+    if not content:
+        return 'Not provide content', 400
+    with tracer.start_as_current_span("Delete Todo"):
+        commit_db("DELETE FROM todo WHERE task = ?", [content])
+        return "success"
 
 if __name__ == '__main__':
+    initialize_database()
     start_http_server(8000)
     app.run(host='0.0.0.0', port=4000)

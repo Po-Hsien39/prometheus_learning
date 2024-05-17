@@ -16,9 +16,12 @@ spec:
     spec:
       containers:
         - name: learning-prometheus
-          image: tristan0725/prometheus_learning
+          image: tristan0725/prometheus_learning:v0.0.6
           ports:
             - containerPort: 4000
               name: server 
             - containerPort: 8000
               name: metrics
+          env: 
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: otel-collector.sre-system.svc.cluster.local:4317
