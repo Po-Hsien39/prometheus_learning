@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import React, { useEffect, useState, useRef } from "react";
+import ReactDOM from "react-dom/client";
 import "./styles.css";
 import Headers from "./Components/headers";
 import Footer from "./Components/footer";
 import Section from "./Components/section";
+import { initializeFaro } from './faro';
 
 function Body() {
   // const faroRef = useRef(null);
@@ -15,12 +16,13 @@ function Body() {
     if (!footerDisplay) setDisplayMode("all");
   }, [footerDisplay]);
 
-  // useEffect(() => {
-  //   if (!faroRef.current) {
-  //     faroRef.current = initializeFaro()
-  //   }
-  // }, [])
-
+  const faroRef = useRef(null);
+  useEffect(() => {
+    if (!faroRef.current) {
+      faroRef.current = initializeFaro()
+    }
+  }, [])
+  
   return (
     <React.StrictMode>
       <div style={{ display: 'flex', justifyContent: 'center'}}>
