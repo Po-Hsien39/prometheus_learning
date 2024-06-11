@@ -4,12 +4,14 @@ from prometheus_client import start_http_server, Counter, Histogram, Gauge
 import time, random
 import logging
 from pythonjsonlogger import jsonlogger
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from model import add_task, get_all_tasks, delete_task
+import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+import logging
 
 app = Flask(__name__)
-CORS(app)
 FlaskInstrumentor().instrument_app(app)
+CORS(app)
 
 # Prometheus 指標
 HTTP_REQUESTS_TOTAL = Counter('requests_total', 'num of total requests', ['route', 'status_code'])
