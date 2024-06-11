@@ -1,14 +1,15 @@
 from flask import Flask, request
+from flask_cors import CORS
 from prometheus_client import start_http_server, Counter, Histogram, Gauge
 import time, random
 import logging
 from pythonjsonlogger import jsonlogger
-from opentelemetry import trace
-from db import initialize_database, query_db, commit_db
-
-tracer = trace.get_tracer("hello.tracer")
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from model import add_task, get_all_tasks, delete_task
 
 app = Flask(__name__)
+CORS(app)
+FlaskInstrumentor().instrument_app(app)
 
 # Prometheus 指標
 HTTP_REQUESTS_TOTAL = Counter('requests_total', 'num of total requests', ['route', 'status_code'])
@@ -48,7 +49,7 @@ def index():
 
 @app.route('/hello')
 def hello():
-    with LATENCY.labels(route="/hello").time() and tracer.start_as_current_span("parent") as rollspan:
+    with LATENCY.labels(route="/hello").time():
         status_code = random.choice([200, 404, 400, 500])
         HTTP_REQUESTS_TOTAL.labels(route="/hello", status_code=str(status_code)).inc()
         if status_code == 200:
@@ -58,29 +59,30 @@ def hello():
     
 @app.route('/todos', methods=['GET'])
 def getTodo():
-    with tracer.start_as_current_span("Get Todo list"):
-        result = query_db("SELECT * FROM todo")
-        return result
+    result = get_all_tasks()
+    res = []
+    for task in result:
+        res.append({"Id": task.id, "task": task.task})
+    return res
 
 @app.route('/todo', methods=['POST'])
 def createTodo():
     content = request.json['content']
     if not content:
         return 'Not provide content', 400
-    with tracer.start_as_current_span("Create Todo"):
-        commit_db("INSERT INTO todo (task) VALUES (%s)", [content])
-        return "success"
+    add_task(content)
+    return "success"
 
 @app.route('/todo', methods=['DELETE'])
 def deleteTodo():
-    content = request.json['content']
-    if not content:
-        return 'Not provide content', 400
-    with tracer.start_as_current_span("Delete Todo"):
-        commit_db("DELETE FROM todo WHERE task = ?", [content])
-        return "success"
+    print("=======================\n")
+    id = request.json['id']
+    if not id:
+        return 'Not provide task id', 400
+    delete_task(id)
+    return "success"
 
 if __name__ == '__main__':
-    initialize_database()
+    # initialize_database()
     start_http_server(8000)
     app.run(host='0.0.0.0', port=4000)

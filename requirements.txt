@@ -8,3 +8,4 @@ opentelemetry-instrumentation-httpx
 opentelemetry-exporter-otlp
 mysql-connector-python
 opentelemetry-instrumentation-mysql
+opentelemetry-instrumentation-flask
